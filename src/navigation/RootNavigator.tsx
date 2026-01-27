@@ -1,33 +1,44 @@
 import React from 'react';
+import { StatusBar } from 'expo-status-bar';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { TabNavigator } from './TabNavigator';
-import { ProductDetailsScreen } from '../screens/ProductDettailsScreen';
 import { RootStackParamList } from './types';
-import { colors } from '../theme/colors';
+import { useSettings } from '../context/SettingsContext'; 
+
+// Only import screens that are NOT in the tabs
+import { LoginScreen } from '../screens/LoginScreen';
+import { SignupScreen } from '../screens/SignupScrenn';
+import { TabNavigator } from './TabNavigator';
+import { CheckoutScreen } from '../screens/CheckoutScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const RootNavigator = () => {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerTintColor: colors.primary,
-        headerBackTitle: '', // This hides the "Back" text safely
-        headerStyle: { backgroundColor: colors.surface },
-        headerShadowVisible: false,
-      }}
-    >
-      <Stack.Screen 
-        name="Tabs" 
-        component={TabNavigator} 
-        options={{ headerShown: false }} 
-      />
+  const { colors, darkMode } = useSettings(); 
 
-      <Stack.Screen 
-        name="ProductDetails" 
-        component={ProductDetailsScreen}
-        options={{ title: '' }} 
-      />
-    </Stack.Navigator>
+  return (
+    <>
+      <StatusBar style={darkMode ? 'light' : 'dark'} backgroundColor={colors.surface} />
+      
+      <Stack.Navigator
+        initialRouteName="Login"
+        screenOptions={{
+          headerTintColor: colors.primary,
+          headerBackTitle: '', 
+          headerStyle: { backgroundColor: colors.surface },
+          headerShadowVisible: false,
+          headerTitleStyle: { color: colors.text }
+        }}
+      >
+        {/* Auth Screens (No Tabs) */}
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Signup" component={SignupScreen} options={{ headerShown: false }} />
+        
+        {/* Main App (Has Tabs inside) */}
+        <Stack.Screen name="Tabs" component={TabNavigator} options={{ headerShown: false }} />
+        
+        {/* Checkout (No Tabs - Focused Flow) */}
+        <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ title: 'Checkout' }} />
+      </Stack.Navigator>
+    </>
   );
 };

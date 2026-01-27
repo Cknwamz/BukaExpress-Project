@@ -2,89 +2,78 @@ import React from 'react';
 import { 
   TouchableOpacity, 
   Text, 
-  ActivityIndicator, 
   StyleSheet, 
-  TouchableOpacityProps 
+  ViewStyle, 
+  ActivityIndicator 
 } from 'react-native';
 import { colors } from '../../theme/colors';
 
-// The "Contract" for using this button
-interface ButtonProps extends TouchableOpacityProps {
+interface ButtonProps {
   title: string;
-  variant?: 'primary' | 'outline'; // Restricts to only these two options
-  isLoading?: boolean;
+  onPress: () => void;
+  variant?: 'primary' | 'secondary' | 'outline';
+  style?: ViewStyle;
+  loading?: boolean; // <--- This fixes the red line
 }
 
 export const Button = ({ 
   title, 
+  onPress, 
   variant = 'primary', 
-  isLoading = false, 
-  style, 
-  disabled,
-  ...props 
+  style,
+  loading = false 
 }: ButtonProps) => {
-  
-  const isPrimary = variant === 'primary';
-  
-  // Dynamic Styles
-  const containerStyle = [
-    styles.container,
-    isPrimary ? styles.primaryContainer : styles.outlineContainer,
-    disabled || isLoading ? styles.disabled : null,
-    style, // Allows overriding from outside if absolutely needed
-  ];
-
-  const textStyle = [
-    styles.text,
-    isPrimary ? styles.primaryText : styles.outlineText,
-  ];
-
   return (
-    <TouchableOpacity
-      style={containerStyle}
-      disabled={disabled || isLoading}
+    <TouchableOpacity 
+      style={[
+        styles.button, 
+        styles[variant], 
+        style,
+        loading && styles.disabled // Dim the button when loading
+      ]} 
+      onPress={onPress}
       activeOpacity={0.8}
-      {...props}
+      disabled={loading} // Prevent double-clicking
     >
-      {isLoading ? (
-        <ActivityIndicator color={isPrimary ? '#FFF' : colors.primary} />
+      {loading ? (
+        <ActivityIndicator color={variant === 'outline' ? colors.primary : '#FFF'} />
       ) : (
-        <Text style={textStyle}>{title}</Text>
+        <Text style={[styles.text, variant === 'outline' && styles.textOutline]}>
+          {title}
+        </Text>
       )}
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  button: {
     height: 50,
-    borderRadius: 8, // Slightly rounded, but still sharp enough for streetwear look
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    width: '100%', // Takes full width of its parent
+    width: '100%',
   },
-  primaryContainer: {
+  primary: {
     backgroundColor: colors.primary,
-    borderWidth: 0,
   },
-  outlineContainer: {
+  secondary: {
+    backgroundColor: colors.secondary,
+  },
+  outline: {
     backgroundColor: 'transparent',
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: colors.primary,
   },
   disabled: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
   text: {
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  primaryText: {
     color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  outlineText: {
+  textOutline: {
     color: colors.primary,
   },
 });

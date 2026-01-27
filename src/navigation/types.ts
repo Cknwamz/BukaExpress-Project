@@ -6,6 +6,21 @@ export type RootTabParamList = {
 };
 
 export type RootStackParamList = {
-  Tabs: undefined; 
-  ProductDetails: { productId: number }; // We MUST pass an ID to open this screen
+  Login: undefined;
+  Signup: undefined;
+  Tabs: undefined;
+  
+  // Tab Internals
+  HomeMain: undefined;     // <--- Added for Home Stack
+  ProfileMain: undefined;  // <--- Added for Profile Stack
+  
+  // Screens
+  ProductDetails: { productId: number };
+  Checkout: undefined;
+  Orders: undefined;
+  Wishlist: undefined;
+  EditProfile: undefined;
+  ShippingAddress: undefined;
+  PrivacyPolicy: undefined;
+  Settings: undefined;
 };

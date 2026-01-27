@@ -7,11 +7,11 @@ import {
   TouchableOpacity, 
   Dimensions 
 } from 'react-native';
-import { colors } from '../../theme/colors';
 import { Product } from '../../types';
+import { useSettings } from '../../context/SettingsContext'; // <--- Import Brain
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - 48) / 2; // (Screen width - padding) / 2 columns
+const cardWidth = (width - 48 - 15) / 2; 
 
 interface ProductCardProps {
   product: Product;
@@ -19,13 +19,23 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product, onPress }: ProductCardProps) => {
+  const { colors } = useSettings(); // <--- Get Dynamic Colors
+
   return (
     <TouchableOpacity 
-      style={styles.container} 
-      activeOpacity={0.9}
+      style={[
+        styles.card, 
+        { 
+          backgroundColor: colors.surface, // Dynamic Background
+          borderColor: colors.border     // Dynamic Border
+        }
+      ]} 
       onPress={onPress}
+      activeOpacity={0.7}
     >
-      <View style={styles.imageContainer}>
+      <View style={[styles.imageContainer, { backgroundColor: '#FFFFFF' }]}> 
+        {/* Images usually look best on white, even in dark mode. 
+            You can change this to colors.surface if you prefer dark box for images. */}
         <Image 
           source={{ uri: product.image }} 
           style={styles.image} 
@@ -34,13 +44,19 @@ export const ProductCard = ({ product, onPress }: ProductCardProps) => {
       </View>
       
       <View style={styles.details}>
-        <Text style={styles.brand} numberOfLines={1}>
-          {product.category.toUpperCase()}
+        <Text 
+          style={[styles.category, { color: colors.textLight }]} 
+          numberOfLines={1}
+        >
+          {product.category}
         </Text>
-        <Text style={styles.title} numberOfLines={2}>
+        <Text 
+          style={[styles.title, { color: colors.text }]} 
+          numberOfLines={2}
+        >
           {product.title}
         </Text>
-        <Text style={styles.price}>
+        <Text style={[styles.price, { color: colors.primary }]}>
           ${product.price.toFixed(2)}
         </Text>
       </View>
@@ -49,22 +65,20 @@ export const ProductCard = ({ product, onPress }: ProductCardProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    width: CARD_WIDTH,
-    backgroundColor: colors.surface,
+  card: {
+    width: cardWidth,
+    borderRadius: 12,
     marginBottom: 16,
-    borderRadius: 0, // Sharp corners for streetwear vibe
-    borderWidth: 1,
-    borderColor: colors.border,
     overflow: 'hidden',
+    borderWidth: 1,
+    // Removed shadow for cleaner dark mode look
   },
   imageContainer: {
-    height: 160,
+    height: 140,
     width: '100%',
-    backgroundColor: '#FFFFFF',
-    padding: 16,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 10,
   },
   image: {
     width: '100%',
@@ -72,26 +86,21 @@ const styles = StyleSheet.create({
   },
   details: {
     padding: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
   },
-  brand: {
+  category: {
     fontSize: 10,
     fontWeight: '700',
-    color: colors.textLight,
+    textTransform: 'uppercase',
     marginBottom: 4,
-    letterSpacing: 1,
   },
   title: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
     marginBottom: 8,
-    height: 36, // Fixed height for 2 lines to align grid
+    height: 36, 
   },
   price: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.primary,
+    fontWeight: '800',
   },
 });

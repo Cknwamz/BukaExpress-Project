@@ -1,5 +1,4 @@
-// src/components/core/Input.tsx
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   View, 
   TextInput, 
@@ -7,67 +6,55 @@ import {
   StyleSheet, 
   TextInputProps 
 } from 'react-native';
-import { colors } from '../../theme/colors';
+import { useSettings } from '../../context/SettingsContext'; // <--- Import Brain
 
-interface InputProps extends TextInputProps {
+interface Props extends TextInputProps {
   label: string;
   error?: string;
 }
 
-export const Input = ({ label, error, style, ...props }: InputProps) => {
-  const [isFocused, setIsFocused] = useState(false);
+export const Input = ({ label, error, style, ...props }: Props) => {
+  const { colors } = useSettings(); // <--- Get Dynamic Colors
 
   return (
-    <View style={styles.wrapper}>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput
+    <View style={styles.container}>
+      <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
+      <TextInput 
         style={[
-          styles.input,
-          isFocused && styles.inputFocused,
-          !!error && styles.inputError, // !! converts string to boolean
-          style,
+          styles.input, 
+          { 
+            backgroundColor: colors.surface, 
+            color: colors.text, 
+            borderColor: colors.border 
+          },
+          error ? { borderColor: colors.error } : null,
+          style
         ]}
         placeholderTextColor={colors.textLight}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
         {...props}
       />
-      {/* Conditionally render error message if it exists */}
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  wrapper: {
+  container: {
     marginBottom: 16,
-    width: '100%',
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
-    marginBottom: 6,
+    marginBottom: 8,
   },
   input: {
-    height: 50,
+    height: 48,
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 16,
     fontSize: 16,
-    color: colors.text,
-    backgroundColor: colors.surface,
-  },
-  inputFocused: {
-    borderColor: colors.primary, // Highlights black when typing
-    borderWidth: 1.5,
-  },
-  inputError: {
-    borderColor: colors.error,
   },
   errorText: {
-    color: colors.error,
     fontSize: 12,
     marginTop: 4,
   },
