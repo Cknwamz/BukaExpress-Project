@@ -1,0 +1,4 @@
+// This connects to the "Fake" storage provided by the library authors
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+);

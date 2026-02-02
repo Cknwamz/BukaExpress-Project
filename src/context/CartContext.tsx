@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Product } from '../types';
+import { api } from '../services/api'; 
+import { useUser } from './UserContext'; 
 
 export interface CartItem extends Product {
   quantity: number;
@@ -23,16 +25,17 @@ interface CartContextType {
   addToWishlist: (product: Product) => void;
   removeFromWishlist: (productId: number) => void;
   isInWishlist: (productId: number) => boolean;
-  placeOrder: () => void;
+  placeOrder: () => Promise<void>; 
   total: number;
   count: number;
   loading: boolean;
-  clearSession: () => void; // <--- NEW FUNCTION
+  clearSession: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
+  const { user } = useUser(); 
   const [items, setItems] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -78,14 +81,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // --- NEW: CLEAN UP WHEN USER LOGS OUT ---
   const clearSession = async () => {
     try {
-      // 1. Wipe State
       setItems([]);
       setWishlist([]);
       setOrders([]);
-      // 2. Wipe Storage
       await AsyncStorage.multiRemove(['@cart', '@wishlist', '@orders']);
     } catch (e) {
       console.error('Failed to clear session', e);
@@ -126,7 +126,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // --- ORDER LOGIC ---
-  const placeOrder = () => {
+  const placeOrder = async () => {
+    if (items.length === 0) return;
+
     const newOrder: Order = {
       id: Math.random().toString(36).substr(2, 9).toUpperCase(),
       date: new Date().toLocaleDateString(),
@@ -134,8 +136,20 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       total: items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
       status: 'Processing'
     };
+
+    // 1. Update Local State (Instant Feedback)
     setOrders(prev => [newOrder, ...prev]);
-    setItems([]);
+    setItems([]); 
+
+    // 2. Send to Backend (If user is logged in)
+    if (user?.email) {
+      try {
+        await api.placeOrder(user.email, newOrder);
+        console.log('Order saved to MongoDB!');
+      } catch (error) {
+        console.error('Failed to sync order to DB', error);
+      }
+    }
   };
 
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -147,7 +161,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       addToCart, removeFromCart, 
       addToWishlist, removeFromWishlist, isInWishlist,
       placeOrder, total, count, loading,
-      clearSession // <--- Exported here
+      clearSession
     }}>
       {children}
     </CartContext.Provider>

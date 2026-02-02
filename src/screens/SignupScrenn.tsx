@@ -111,6 +111,7 @@ export const SignupScreen = ({ navigation }: Props) => {
             />
 
             <Input 
+              testID="password-input" 
               label="Password" 
               placeholder="••••••••" 
               value={password} 
@@ -132,6 +133,7 @@ export const SignupScreen = ({ navigation }: Props) => {
             )}
 
             <Input 
+              testID="confirm-input"
               label="Confirm Password" 
               placeholder="••••••••" 
               value={confirmPassword} 

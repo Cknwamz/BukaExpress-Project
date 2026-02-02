@@ -1,11 +1,8 @@
 import axios from 'axios';
 
-// ✅ Your specific IPv4 address
-const BASE_URL = 'http://192.168.2.17:5000'; 
+const BASE_URL = 'http://172.20.10.13:5000'; 
 
 export const api = {
-  // 1. REGISTER
-  // Updated to accept name
   register: async (email: string, password: string, name: string) => {
     try {
       const response = await axios.post(`${BASE_URL}/register`, { email, password, name });
@@ -32,6 +29,16 @@ export const api = {
       return response.data;
     } catch (error: any) {
       throw error.response?.data?.error || 'Update failed';
+    }
+  },
+
+  // 4. PLACE ORDER
+  placeOrder: async (email: string, order: any) => {
+    try {
+      const response = await axios.post(`${BASE_URL}/orders`, { email, order });
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data?.error || 'Order failed';
     }
   }
 };
